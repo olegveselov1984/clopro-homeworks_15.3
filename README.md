@@ -84,7 +84,9 @@ resource "yandex_resourcemanager_folder_iam_member" "kms-storage-editor" {
 ```
 
 
+<img width="821" height="492" alt="image" src="https://github.com/user-attachments/assets/48f2144c-6142-48ce-9077-dbae7d4230a6" />
 
+<img width="1333" height="232" alt="image" src="https://github.com/user-attachments/assets/7f0a579f-aa5a-4bdb-9547-2f50385d5844" />
 
 
 
