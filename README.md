@@ -22,6 +22,74 @@
 - [KMS key](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/kms_symmetric_key).
 
 --- 
+
+Создан файл kms_key.tf
+```
+resource "yandex_kms_symmetric_key" "kms_key" {
+  name        = "example-key"
+  description = "Key for encrypting bucket contents"
+  default_algorithm = "AES_256"
+  rotation_period = "24h"
+}
+```
+
+В main.tf  "resource "yandex_storage_bucket" "pictures-bucket"" скорректирован и добавлен раздел:
+```
+resource "yandex_storage_bucket" "pictures-bucket" {
+
+    access_key = yandex_iam_service_account_static_access_key.sa-sa-key.access_key
+    secret_key = yandex_iam_service_account_static_access_key.sa-sa-key.secret_key
+    bucket = "pictures-bucket"
+#    acl    = "public-read"  # публичное хранилище
+    anonymous_access_flags {
+      read = true
+      list = false
+  }  
+    cors_rule {
+      allowed_headers = ["*"]
+      allowed_methods = ["PUT", "POST", "GET", "DELETE"]
+      allowed_origins = ["*"]
+      expose_headers  = ["ETag"]
+      max_age_seconds = 3000
+  }
+
+    force_destroy = true
+
+
+#    max_size   = 1048576
+    #############################Данный длок для шифрования. файл kms.tf
+    server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = yandex_kms_symmetric_key.kms_key.id
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+  ########################################
+
+  depends_on = [ yandex_iam_service_account.sa4bucket ]
+}
+```
+
+В main.tf  для существующей сервисной УЗ sa4bucket добавлены права:
+```
+// Grant permissions fo sa4bucket
+resource "yandex_resourcemanager_folder_iam_member" "kms-storage-editor" {
+    folder_id = var.folder_id
+    role      = "kms.keys.encrypterDecrypter"
+    member    = "serviceAccount:${yandex_iam_service_account.sa4bucket.id}"
+    depends_on = [yandex_iam_service_account.sa4bucket]
+}
+```
+
+
+<img width="821" height="492" alt="image" src="https://github.com/user-attachments/assets/48f2144c-6142-48ce-9077-dbae7d4230a6" />
+
+<img width="1333" height="232" alt="image" src="https://github.com/user-attachments/assets/7f0a579f-aa5a-4bdb-9547-2f50385d5844" />
+
+
+
 ## Задание 2*. AWS (задание со звёздочкой)
 
 Это необязательное задание. Его выполнение не влияет на получение зачёта по домашней работе.
