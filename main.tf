@@ -69,7 +69,7 @@ resource "yandex_storage_bucket" "pictures-bucket" {
     access_key = yandex_iam_service_account_static_access_key.sa-sa-key.access_key
     secret_key = yandex_iam_service_account_static_access_key.sa-sa-key.secret_key
     bucket = "pictures-bucket"
-#    acl    = "public-read"  # публичное хранилище
+#    acl    = "public-read"  # вместо ACL раздел ниже (публичное хранилище)
     anonymous_access_flags {
       read = true
       list = false
